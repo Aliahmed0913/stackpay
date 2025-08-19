@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from .models import EmailCode
+from .services.verifying_code import create_email_code
 import re, logging
 logger = logging.getLogger(__name__)
 
@@ -11,9 +13,10 @@ user = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta():
         model = user
-        fields = ['id', 'username', 'role_management', 'email', 'phone_number', 'password']
+        fields = ['id', 'username', 'role_management', 'email', 'phone_number', 'password' , 'is_active']
         extra_kwargs={
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'is_active':{'read_only': True}
         }
     
     def update(self, instance, validated_data):
@@ -42,4 +45,12 @@ class UserSerializer(serializers.ModelSerializer):
         return value
         
     def create(self, validated_data):
-        return user.objects.create_user(**validated_data)
+        user = user.objects.create_user(**validated_data)
+        create_email_code(user)
+        return user
+
+class EmailCodeSerializer(serializers.ModelSerializer):
+    class Meta():
+        model = EmailCode
+        fields = '__all__'
+        read_only_fields = '__all__'
