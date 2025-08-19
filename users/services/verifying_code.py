@@ -2,6 +2,7 @@ from users.models import User,EmailCode
 from users.serializers import EmailCodeSerializer
 from django.utils import timezone
 from datetime import timedelta
+from task import mail_user_code
 import random, logging
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ def create_email_code(user:User):
         expiry_time=timezone.now() + EXPIRY_CODE
     )
     logger.info(f'New code successfuly created for {user.username}.')
+    mail_user_code.delay(generated_email_code.id)
     return generated_email_code
     
 def generate_code():
