@@ -1,12 +1,12 @@
 from celery import shared_task
 from users.models import EmailCode
-from notifications.services.send_code import mail_verify_code
+from notifications.utils.mailer import mail_verify_code
 import logging
 
 logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3)
-def mail_user_code(self,emailcode_id):
+def mail_code_task(self,emailcode_id):
     try:
         logger.info('start mail you code...')
         emailcode = EmailCode.objects.get(id=emailcode_id)

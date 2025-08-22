@@ -61,7 +61,7 @@ ROOT_URLCONF = 'Restaurant.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR/'templates'],
+        'DIRS': [BASE_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -157,6 +157,8 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL=env('DEFAULT_FROM_EMAIL')
 
+#verification code length
+CODE_LENGTH = 6
 
 # CELERY_CONFIGURATION
 CELERY_BROKER_URL = "redis://localhost:6379/0"

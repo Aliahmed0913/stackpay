@@ -5,10 +5,10 @@ from django.template.loader import render_to_string
 
 def mail_verify_code(user_code:EmailCode):
     
-    subject = 'Verify you email'
+    subject = 'Verify your email'
     send_to = [user_code.user.email]
     email_from = DEFAULT_FROM_EMAIL
-    html_body =  render_to_string('verification_code.html',{
+    html_body =  render_to_string('notifications/templates/verification_code.html',{
         'user':user_code.user ,
         'code':user_code.code
     })
@@ -21,5 +21,3 @@ def mail_verify_code(user_code:EmailCode):
         email.send()
     except Exception as error:
         raise 
-    
-    

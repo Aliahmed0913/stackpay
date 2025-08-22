@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import EmailCode
-from .services.verifying_code import create_email_code
-import re, logging
+from .validators import validate_password, validate_phone_number
+from users.services.verifying_code import VerificationCodeService
+from Restaurant.settings import CODE_LENGTH
+import logging
 logger = logging.getLogger(__name__)
 
-PASSWORD_REGEX = re.compile(r'^[A-Z](?=.*[a-z])(?=.*\d)(?!.*\s).{7,14}$')
-PHONE_NUMBER_REGEX = re.compile(r'^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$')
+
 
 user = get_user_model()
 
@@ -34,23 +34,17 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
     def validate_password(self, value):    
-        if not PASSWORD_REGEX.fullmatch(value):
-            raise serializers.ValidationError({'Error':'Password must be alphanumeric start with uppercase ,'
-                                              'restricted in (8,15) character'})
-        return value
+        return validate_password(value)
    
     def validate_phone_number(self, value):    
-        if not PHONE_NUMBER_REGEX.fullmatch(value):
-            raise serializers.ValidationError('only allowing for an international dialing code at the start, - and spaces')
-        return value
+        return validate_phone_number(value)
         
     def create(self, validated_data):
         c_user = user.objects.create_user(**validated_data)
-        create_email_code(c_user)
+        service = VerificationCodeService(c_user)
+        service.create_code()
         return c_user
 
-class EmailCodeSerializer(serializers.ModelSerializer):
-    class Meta():
-        model = EmailCode
-        fields = '__all__'
-        read_only_fields = '__all__'
+class EmailCodeVerificationSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+        code = serializers.CharField(required=False,max_length=CODE_LENGTH,min_length=CODE_LENGTH)
