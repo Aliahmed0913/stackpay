@@ -59,7 +59,6 @@ class UserProfileViewSet(ModelViewSet):
         
     @action(detail=False, methods=['PATCH'],url_path='mine/new-password') 
     def change_password(self, request):
-        #serializerfor password
         serializer = ChangePasswordSerializer(data=request.data, context={'request':request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -78,12 +77,11 @@ class VerificationCodeViewSet(GenericViewSet):
     
     @action(detail=False, methods=['POST'], url_path='validate')
     def verifying_user_code(self,request):
-       
-       
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         recived_code = serializer.validated_data['code']
         email = serializer.validated_data['email'] 
+        
         user = self.get_user(email)
 
         if not recived_code:
