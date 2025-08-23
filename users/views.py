@@ -123,10 +123,7 @@ class VerificationCodeViewSet(GenericViewSet):
             raise NotFound({'error':f'user with email {email} does\'t exist!'})
 
 
-
-# Create your views here.
-
-#Customize token-generator to limit request per minute to 10
 class CustomTokenObtainPairView(TokenObtainPairView):
+    '''Customize token-generator to limit request per minute to 10'''
     throttle_scope = 'login'
 
