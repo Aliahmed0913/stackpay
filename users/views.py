@@ -27,10 +27,11 @@ class UserProfileViewSet(ModelViewSet):
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
     
+    permission_classes = IsAuthenticated
     def get_permissions(self):
         if self.action in ['list','retrieve','partial_update']:
             return [IsAdmin()]
-        return [IsAuthenticated(),IsAdminOrOwner()]
+        return [IsAdminOrOwner()]
     
     def get_throttles(self):
         if self.action == 'change_password':

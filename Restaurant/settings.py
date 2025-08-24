@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
         'verify_code':'10/10m',
         'login': '10/minute',
         'profile':'30/minute',
-        'new_password':'2/day',
+        'new_password':'10/day',
         'resend_code':'3/minute',
         'default':'10/houre'
     }
