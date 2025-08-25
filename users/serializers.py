@@ -45,16 +45,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user_role = request.user.role_management
         if 'role_management' in validated_data and user_role != 'ADMIN':
             validated_data.pop('role_management')
-            logger.warning(f'{request.user.username} can\'t upgrade admin')
+            logger.warning(f'{request.user.username} can\'t upgrade himself to admin')
+            raise serializers.ValidationError({'detail':'User can\'t upgrade himself to admin'})
         
         if 'is_active' in validated_data and user_role != 'ADMIN':
             validated_data.pop('role_management')
-            logger.warning(f'{user_role} can\'t activate user')
-            
+            logger.warning(f'{user_role} can\'t activate himself')
+            raise serializers.ValidationError({'detail':'User can\'t activate himself'})
+        
         if 'password' in validated_data:
             validated_data.pop('password')
             logger.warning('This endpoint can\'t update passwords')
-            
+            raise serializers.ValidationError({'detail':'Page can\'t handle password change.'})
+        
         return super().update(instance, validated_data)
 
 class EmailCodeVerificationSerializer(serializers.Serializer):
