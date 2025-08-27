@@ -10,10 +10,15 @@ def remove_expired_code(limit=500):
        limit (int): rate the limite of delete per batch
     '''
     while True:
-        expired_codes = EmailCode.objects.filter(expiry_time__lt=now())[:limit]
-        count = expired_codes.count()
-        if not count:
+        expired_code_ids = list(
+            EmailCode.objects
+            .filter(expiry_time__lt=now())
+            .values_list('id',flat=True)[:limit]
+            )
+        
+        if not expired_code_ids:
             break
-        expired_codes.delete()
-        logger.info({'event':'expired_codes_cleanup', 'deleted_count':{count}})
+        
+        deleted_count, _ = EmailCode.objects.filter(id__in=expired_code_ids).delete() 
+        logger.info({'event':'expired_codes_cleanup', 'deleted_count':{deleted_count}})
     
