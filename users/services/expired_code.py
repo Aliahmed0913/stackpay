@@ -7,8 +7,9 @@ def remove_expired_code(limit=500):
     '''Remove expired EmailCode records from DB in batches
      
        Arg:
-       limit (int): rate the limite of delete per batch
+       limit (int): number of record to delete per batch
     '''
+    logger.info({'event':'expired_codes_cleanupp start...'})
     while True:
         expired_code_ids = list(
             EmailCode.objects
@@ -20,5 +21,7 @@ def remove_expired_code(limit=500):
             break
         
         deleted_count, _ = EmailCode.objects.filter(id__in=expired_code_ids).delete() 
-        logger.info({'event':'expired_codes_cleanup', 'deleted_count':{deleted_count}})
+        logger.info({'event':'expired_codes_cleanup', 'deleted_count':deleted_count})
+    logger.info({'event':'expired_codes_cleanup done'})
+    
     
