@@ -1,6 +1,9 @@
 from django.core.exceptions import ValidationError
 import string
 from django.utils.translation import gettext as _
+import phonenumbers
+from rest_framework import serializers
+from phonenumbers.phonenumberutil import NumberParseException
 
 class PasswordCustomValidator:
     def validate(self, password:str, user=None):
@@ -32,4 +35,23 @@ class PasswordCustomValidator:
                 )     
 
 
+class PhoneNumberValidator:
+    def __init__(self, country_field=None):
+        self.country_field = country_field
+    
+    def __call__(self, value, serializer_field):
+        country = None
+        if self.country_field:
+            country_value = serializer_field.parent.initial_data.get(self.country_field)
+            country = country_value.upper() if country_value else None
         
+        try:
+            phonenumber = phonenumbers.parse(value,country)
+        
+            if not phonenumbers.is_possible_number(phonenumber):
+                raise serializers.ValidationError({'phone_number':'Format is not possible'})
+        
+            if not phonenumbers.is_valid_number(phonenumber):
+                raise serializers.ValidationError({'phone_number':'Not valid for specific region'})
+        except NumberParseException:
+            raise serializers.ValidationError({'phone_number':'Missing or invalid region/format'})

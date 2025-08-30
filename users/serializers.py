@@ -4,8 +4,12 @@ from users.services.verifying_code import VerificationCodeService
 from django.contrib.auth.hashers import check_password
 from Restaurant.settings import CODE_LENGTH
 from django.contrib.auth.password_validation import validate_password
+from users.validators import PhoneNumberValidator
 import logging, re
 logger = logging.getLogger(__name__)
+
+import phonenumbers
+from phonenumbers.phonenumberutil import NumberParseException
 
 
 PHONE_NUMBER_REGEX = re.compile(r'^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$')
@@ -13,9 +17,12 @@ User = get_user_model()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    country = serializers.CharField(max_length=2, write_only=True, default=None)
+    phone_number = serializers.CharField(max_length=20,validators=[PhoneNumberValidator(country_field='country')])
+    
     class Meta():
         model = User
-        fields = ['id', 'username', 'role_management', 'email', 'phone_number', 'password']
+        fields = ['id', 'username', 'role_management', 'email', 'phone_number', 'password','country']
         extra_kwargs={
             'password': {'write_only': True},
         }
@@ -23,17 +30,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate_password(self, value):    
         validate_password(value,self.instance)
         return value 
-   
-    def validate_phone_number(self, value):    
-        if not PHONE_NUMBER_REGEX.fullmatch(value):
-            raise serializers.ValidationError(
-                'only allowing for an international dialing code at the start, - and spaces'
-                )
-        return value
-        
+    
+    def validate_phone_number(self,value):
+        parse_number = phonenumbers.parse(value,self.initial_data.get('country'))
+        return str(phonenumbers.format_number(parse_number,phonenumbers.PhoneNumberFormat.E164))
+
     def create(self, validated_data):
+        validated_data.pop('country')  
         c_user = User.objects.create_user(**validated_data,
-                                          is_active=False # will activated after success verification
+                                          is_active=False,# will activated after success verification
                                           )
         service = VerificationCodeService(c_user)
         service.create_code()
@@ -54,7 +59,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'detail':'User can\'t upgrade himself to admin'})
         
         if 'is_active' in validated_data and user_role != 'ADMIN':
-            validated_data.pop('role_management')
+            validated_data.pop('is_active')
             logger.warning(f'{user_role} can\'t activate himself')
             raise serializers.ValidationError({'detail':'User can\'t activate himself'})
         
