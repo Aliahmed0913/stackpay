@@ -140,7 +140,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES':{
-        'sign_up':'5/minute',
+        'sign_up':'100/minute',
         'verify_code':'10/m',
         'login': '10/minute',
         'profile':'30/minute',

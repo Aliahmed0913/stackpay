@@ -92,7 +92,7 @@ class VerificationCodeViewSet(GenericViewSet):
         if not recived_code:
             return Response({'code':'this field is required!'},status=status.HTTP_400_BAD_REQUEST)
         
-        service = VerificationCodeService(user)
+        service = VerificationCodeService(user.id)
         result = service.validate_code(recived_code) 
               
         if result == VerifyCodeStatus.VALID:
@@ -117,12 +117,15 @@ class VerificationCodeViewSet(GenericViewSet):
         email = serializer.validated_data['email']
         
         user = self.get_user(email)
-        service = VerificationCodeService(user)
+        service = VerificationCodeService(user.id)
         code = service.recreate_code_on_demand()
-        if code:
+        
+        if code == VerifyCodeStatus.CREATED:
             send_verification_code(code.id)
             return Response({'code':'new verify code is send'},status=status.HTTP_200_OK)
-        return Response({'code':'currently valid'})
+        elif code == VerifyCodeStatus.VALID:
+            return Response({'code':'currently valid'})
+        return Response({'code':'User is verified and activated'})
 
     def get_user(self,email):
         try:

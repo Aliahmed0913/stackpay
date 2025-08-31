@@ -13,6 +13,8 @@ class VerifyCodeStatus(Enum):
     NOT_FOUND = 'not_found'
     EXPIRED = 'expired'
     IN_VALID = 'in_valid'
+    ACTIVE = 'active'
+    CREATED = 'created'
     
 class VerificationCodeService:
     
@@ -60,16 +62,19 @@ class VerificationCodeService:
         return VerifyCodeStatus.IN_VALID
     
     def recreate_code_on_demand(self):
-        '''Check if there is no active verify code for user it will generate new one.'''
+        '''Check if there is no active verify code for not activated user and generate new one.'''
         current_code = self.active_code()
         
-        if not current_code or self.is_expired_code(current_code):
+        if self.user.is_active == True:
+            return VerifyCodeStatus.ACTIVE
+        
+        elif not current_code or self.is_expired_code(current_code):
                 self.create_code() 
-                return True
+                return VerifyCodeStatus.CREATED
         
         remaining = current_code.expiry_time - timezone.now()
         logger.info(f'verify code has {remaining.seconds // 60} minute left')    
-        return False
+        return VerifyCodeStatus.VALID
     
     def is_expired_code(self,code):
         if code.expiry_time <= timezone.now():
