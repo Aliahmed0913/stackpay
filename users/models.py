@@ -9,8 +9,8 @@ class User(AbstractUser):
         ADMIN='ADMIN','admin'
         STAFF='STAFF','staff'
         CUSTOMER='CUSTOMER','customer'
-    role_management=models.CharField(max_length=10, choices=Roles.choices, default=Roles.CUSTOMER)
-        
+    
+    role_management=models.CharField(max_length=10, choices=Roles.choices, default=Roles.CUSTOMER)     
     email=models.EmailField(unique=True)
     password = models.CharField(max_length=128)
     is_active = models.BooleanField(default=False)

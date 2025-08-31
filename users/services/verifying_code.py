@@ -13,6 +13,7 @@ class VerifyCodeStatus(Enum):
     NOT_FOUND = 'not_found'
     EXPIRED = 'expired'
     IN_VALID = 'in_valid'
+    
 class VerificationCodeService:
     
     DEFAULT_EXPIRY = timedelta(minutes=10)
@@ -36,20 +37,22 @@ class VerificationCodeService:
         return generated_email_code
     
     def validate_code(self,received_code:str):
-        '''Check if there an active code for requested user and evaluate it with received_code'''
-        actual_code = self.active_code()
+        '''
+        Check if there an active code for requested user and evaluate it with received_code.
+        '''
+        verify_code = self.active_code()
         
-        if not actual_code:
+        if not verify_code:
             logger.warning(f'there is no active code for {self.user.username}')            
             return VerifyCodeStatus.NOT_FOUND
     
-        if self.is_expired_code(actual_code):
+        if self.is_expired_code(verify_code):
             return VerifyCodeStatus.EXPIRED
     
-        elif str(actual_code.code) == received_code:
+        elif str(verify_code.code) == received_code:
             self.user.is_active = True
             self.user.save(update_fields=['is_active'])
-            self.disable_code(actual_code)
+            self.disable_code(verify_code)
             logger.info(f'welcome {self.user.username} your account has verified')
             return VerifyCodeStatus.VALID
         
@@ -57,6 +60,7 @@ class VerificationCodeService:
         return VerifyCodeStatus.IN_VALID
     
     def recreate_code_on_demand(self):
+        '''Check if there is no active verify code for user it will generate new one.'''
         current_code = self.active_code()
         
         if not current_code or self.is_expired_code(current_code):
@@ -75,12 +79,13 @@ class VerificationCodeService:
         return False   
     
     def disable_code(self,code):
-        ''' Marked code as Used'''
+        ''' Marked code as used.'''
         code.is_used = True
         code.save(update_fields=['is_used'])
 
     
     def active_code(self):
+        '''Return lastly active code for specific user.'''
         return EmailCode.objects.filter(user_id=self.user.id, is_used=False).order_by('-created_at').first()
     
     def generate_code(self):

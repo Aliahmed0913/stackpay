@@ -1,17 +1,15 @@
-import phonenumbers
-from phonenumbers.phonenumberutil import NumberParseException
-
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
-from Restaurant.settings import CODE_LENGTH
 from django.contrib.auth.password_validation import validate_password
 
-import logging
+import phonenumbers, logging 
+from phonenumbers.phonenumberutil import NumberParseException
+from Restaurant.settings import CODE_LENGTH
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
-
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     country = serializers.CharField(max_length=2, write_only=True, default=None)
@@ -47,10 +45,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('country')  
         c_user = User.objects.create_user(**validated_data,
-                                        is_active=False,# will activated after success verification
-                                        )
+                                          is_active=False # will activated after success verification
+                                          )
         return c_user
+
+class EmailCodeVerificationSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+        code = serializers.CharField(required=False,max_length=CODE_LENGTH,min_length=CODE_LENGTH)
     
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta():
         model = User
@@ -73,11 +76,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'detail':'Page can\'t handle password change.'})
         
         return super().update(instance, validated_data)
-
-class EmailCodeVerificationSerializer(serializers.Serializer):
-        email = serializers.EmailField()
-        code = serializers.CharField(required=False,max_length=CODE_LENGTH,min_length=CODE_LENGTH)
-        
+   
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
