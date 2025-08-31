@@ -1,9 +1,6 @@
 from django.core.exceptions import ValidationError
 import string
 from django.utils.translation import gettext as _
-import phonenumbers
-from rest_framework import serializers
-from phonenumbers.phonenumberutil import NumberParseException
 
 class PasswordCustomValidator:
     def validate(self, password:str, user=None):
