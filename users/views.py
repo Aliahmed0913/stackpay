@@ -13,6 +13,7 @@ from users.models import User
 from users.services.verifying_code import VerificationCodeService, VerifyCodeStatus
 from core.permissions.user import IsAdminOrOwner,IsAdmin
 from notifications.services.verification_code import send_verification_code
+
 # Create your views here.
 
 class UserRegistrationView(APIView):
@@ -119,7 +120,9 @@ class VerificationCodeViewSet(GenericViewSet):
         user = self.get_user(email)
         service = VerificationCodeService(user)
         
-        if service.recreate_code_on_demand():
+        code = service.recreate_code_on_demand()
+        if code:
+            send_verification_code(code.id)
             return Response({'code':'new verify code is send'},status=status.HTTP_200_OK)
         return Response({'code':'currently valid'})
 
