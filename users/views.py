@@ -20,12 +20,8 @@ class UserRegistrationView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        c_user = serializer.save()
-        
-        service = VerificationCodeService(c_user.id)
-        code = service.create_code()
-        send_verification_code(code.id) # here where celery task is started 
-        
+        serializer.save() #django fire an post_save event 
+         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class UserProfileViewSet(ModelViewSet):
