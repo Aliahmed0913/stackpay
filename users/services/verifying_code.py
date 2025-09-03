@@ -67,9 +67,11 @@ class VerificationCodeService:
         '''Check if there is no active verify code for not activated user and generate new one.'''
         current_code = self.active_code()
         
+        #check if the user has been verified before
         if self.user.is_active == True:
             return VerifyCodeStatus.ACTIVE
         
+        # see if there is no code for that user or is expired if exsit or not
         elif not current_code or self.is_expired_code(current_code):
                 self.create_code() 
                 return VerifyCodeStatus.CREATED
@@ -79,6 +81,7 @@ class VerificationCodeService:
         return VerifyCodeStatus.VALID
     
     def is_expired_code(self,code):
+        # check if code expired time exceeded the current time 
         if code.expiry_time <= timezone.now():
             logger.warning('code is expired!')
             self.disable_code(code)
@@ -97,7 +100,8 @@ class VerificationCodeService:
     
     def generate_code(self):
         '''
-        Generate numeric verification code.
+        Return numeric value of specified length (CODE_LENGTH)
+        
         '''
         min_value = 10 ** (CODE_LENGTH - 1)
         max_value = (10 ** CODE_LENGTH) - 1 
