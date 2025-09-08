@@ -19,7 +19,7 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_password2(self):
         password = self.cleaned_data.get('password1')
         validate_password(password)
-        return super().clean_password2()
+        return password
     
 class CustomUserChangeForm(UserChangeForm):
     country = forms.CharField(max_length=2,required=False)

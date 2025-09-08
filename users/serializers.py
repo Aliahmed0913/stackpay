@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    country = serializers.CharField(max_length=2, write_only=True, default=None)
     
     class Meta():
         model = User
@@ -26,8 +25,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return value 
     
     def validate_phone_number(self,value):
-        country = self.initial_data.get('country')
-        return validate_phone(value,country)
+        return validate_phone(value)
 
     def create(self, validated_data):
         validated_data.pop('country')  

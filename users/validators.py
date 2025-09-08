@@ -34,10 +34,9 @@ class PasswordCustomValidator:
                 'no spaces and contain at least one special character.'
                 )     
 
-def validate_phone(value,country=None):
-    country = country.upper() if country else None
+def validate_phone(value):
     try:
-        phonenumber = phonenumbers.parse(value,country)
+        phonenumber = phonenumbers.parse(value)
     
         if not phonenumbers.is_possible_number(phonenumber):
             raise ValidationError('Format is not possible')
@@ -46,6 +45,6 @@ def validate_phone(value,country=None):
             raise ValidationError('Not valid for specific region')
     
     except NumberParseException:
-        raise ValidationError('Missing or invalid region or format')
+        raise ValidationError('Missing or invalid international format.')
     
     return str(phonenumbers.format_number(phonenumber,phonenumbers.PhoneNumberFormat.E164))
