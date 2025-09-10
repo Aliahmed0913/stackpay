@@ -7,10 +7,10 @@ from phonenumbers.phonenumberutil import NumberParseException
 
 class PasswordCustomValidator:
     def validate(self, password:str, user=None):
-        length = len(password)
         first_char = password[0]
-        if length > 15 or length < 8 :
-            raise ValidationError(_('Length of password must be between 8-15 characters.'),code='Password_length')
+        
+        if len(password) > 15 :
+            raise ValidationError(_('Password length must be less than 15 characters.'),code='Password_length')
         
         if not first_char.isupper():
             raise ValidationError(_('password must start with uppercase letter.'),code='Password_no-uppercase_start')
@@ -19,7 +19,7 @@ class PasswordCustomValidator:
             raise ValidationError(_('Password must contain at least lowercase letter.'),code='Password_no_lowercase')
         
         if not any(c.isdigit() for c in password):
-            raise ValidationError(_('Password must contain digit.'),code='Password_no_digit')
+            raise ValidationError(_('Password must contain digit at least.'),code='Password_no_digit')
         
         if ' ' in password:
             raise ValidationError(_('Password can\'t contain spaces'),code='Password_contain_spaces')
@@ -39,12 +39,12 @@ def validate_phone(value):
         phonenumber = phonenumbers.parse(value)
     
         if not phonenumbers.is_possible_number(phonenumber):
-            raise ValidationError('Format is not possible')
+            raise ValidationError(_('Format is not possible'))
     
         if not phonenumbers.is_valid_number(phonenumber):
-            raise ValidationError('Not valid for specific region')
+            raise ValidationError(_('Not valid for specific region'))
     
     except NumberParseException:
-        raise ValidationError('Missing or invalid international format.')
+        raise ValidationError(_('Missing or invalid international format.'))
     
     return str(phonenumbers.format_number(phonenumber,phonenumbers.PhoneNumberFormat.E164))
