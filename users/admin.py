@@ -12,18 +12,14 @@ class CustomUserAdmin(UserAdmin):
     
     add_fieldsets = (
         (None,{'classes':('wide',),
-            "fields": ("username", "email", "phone_number", "role_management", "password1", "password2"),
+            "fields": ("username", "email", "role_management", "password1", "password2"),
         }),
     )
     
     fieldsets = (
-        # add phone_number field to Personal info section and return with all regular userAdmin fieldsets(opt)
-        *((name,{**opt,'fields':opt['fields']+('phone_number',)}) if name == 'Personal info' else (name,opt) 
-        for name,opt in UserAdmin.fieldsets),
-        
         ('Role info',{"fields": ("role_management",)}),
     )
 
     list_display = ("id", "username", "email", "role_management", "is_staff", "is_superuser")
     list_filter = ("role_management", "is_staff", "is_superuser")
-    search_fields = ("username", "email", "phone_number")
+    search_fields = ("username", "email")
