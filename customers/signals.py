@@ -3,7 +3,7 @@ from django.db import transaction
 from django.dispatch import receiver
 
 from users.models import User
-from customers.models import Customer, Address, KnowYouCustomer
+from customers.models import Customer, Address, KnowYourCustomer
 
 @receiver(post_save,sender=User)
 def handle_activation_user(sender, instance, created, **kwargs):
@@ -25,5 +25,5 @@ def handle_customer_profile(sender, instance, created, **kwargs):
     def on_commit():
         if created:
             Address.objects.create(customer=instance)
-            KnowYouCustomer.objects.create(customer=instance)
+            KnowYourCustomer.objects.create(customer=instance)
     transaction.on_commit(on_commit)

@@ -31,7 +31,7 @@ class Address(models.Model):
     def __str__(self):
         return f'{self.customer.full_name or self.customer.user.username} - {self.state}'
     
-class KnowYouCustomer(models.Model):
+class KnowYourCustomer(models.Model):
     class DocumentType(models.TextChoices):
         NATIONAL_ID = 'national_id','National_id'
         PASSPORT = 'passport','Passport'
