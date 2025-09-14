@@ -43,7 +43,7 @@ class KnowYouCustomer(models.Model):
         REJECTED = 'rejected','Rejected'
     
     customer = models.OneToOneField(Customer,on_delete=models.CASCADE,related_name='kyc')
-    document_type = models.CharField(max_length=20, choices=DocumentType.choices,default=DocumentType.national)
+    document_type = models.CharField(max_length=20, choices=DocumentType.choices,default=DocumentType.NATIONAL_ID)
     document_id = models.CharField(max_length=100,blank=True,null=True)
     document_pic = models.FileField(upload_to='kyc-document/')
     status_tracking = models.CharField(max_length=20,choices=Status.choices,default=Status.PENDING)
