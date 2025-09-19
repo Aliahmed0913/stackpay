@@ -1,18 +1,25 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser 
+from django.contrib.auth.models import AbstractUser,UserManager
 # Create your models here.
 
+class CustomUserManager(UserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("role_management", User.Roles.ADMIN)
+        # extra_fields.setdefault('is_active',True)
+        return super().create_superuser(username, email, password, **extra_fields)
+    
 class User(AbstractUser):
     class Roles(models.TextChoices):
         ADMIN='ADMIN','admin'
         STAFF='STAFF','staff'
         CUSTOMER='CUSTOMER','customer'
-    
-    role_management=models.CharField(max_length=10, choices=Roles.choices, default=Roles.CUSTOMER)     
+            
+    role_management=models.CharField(max_length=10,
+                                    choices=Roles.choices,
+                                    default=Roles.CUSTOMER)     
     email=models.EmailField(unique=True)
-    password = models.CharField(max_length=128)
-    is_active = models.BooleanField(default=False)
     
+    objects = CustomUserManager()
     
     def __str__(self):
         return self.username
@@ -23,3 +30,6 @@ class EmailCode(models.Model):
     expiry_time = models.DateTimeField()
     is_used = models.BooleanField(default=False)
     created_at =  models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.user.email
