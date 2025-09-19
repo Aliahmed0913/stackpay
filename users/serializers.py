@@ -15,8 +15,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta():
         model = User
         fields = ['id', 'username', 'email', 'password','role_management']
+        read_only_fields = ('is_active',)
         extra_kwargs={
             'password': {'write_only': True},
+            'is_active':{'default': False},
         }
     
     def validate_password(self, value):    
