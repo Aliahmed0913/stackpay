@@ -12,7 +12,7 @@ class PasswordCustomValidator:
             raise ValidationError(_('Password length must be less than 15 characters.'),code='Password_length')
         
         if not first_char.isupper():
-            raise ValidationError(_('password must start with uppercase letter.'),code='Password_no-uppercase_start')
+            raise ValidationError(_('Password must start with uppercase letter.'),code='Password_no-uppercase_start')
         
         if not any(c.islower() for c in password):
             raise ValidationError(_('Password must contain at least lowercase letter.'),code='Password_no_lowercase')
@@ -29,7 +29,7 @@ class PasswordCustomValidator:
     def get_help_text(self):
         return _(
                 'Password must be 8-15 length,'
-                'start with uppercase, contain one lowercase at least,'
-                'no spaces and contain at least one special character.'
+                'Start with uppercase, Contain one lowercase at least,'
+                'No spaces and contain at least one special character.'
                 )     
 
