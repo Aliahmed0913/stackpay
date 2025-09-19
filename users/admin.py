@@ -1,5 +1,5 @@
 from django.contrib import admin
-from users.models import User
+from users.models import User, EmailCode
 from django.contrib.auth.admin import UserAdmin
 from users.forms import CustomUserChangeForm,CustomUserCreationForm
 # Register your models here.
@@ -16,7 +16,7 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
     
-    fieldsets = (
+    fieldsets = UserAdmin.fieldsets + (
         ('Role info',{"fields": ("role_management",)}),
     )
 
