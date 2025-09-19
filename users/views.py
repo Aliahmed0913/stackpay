@@ -118,7 +118,7 @@ class VerificationCodeViewSet(GenericViewSet):
         code = service.recreate_code_on_demand()
         
         if code == VerifyCodeStatus.CREATED:
-            return Response({'code':'new verify code is send'},status=status.HTTP_200_OK)
+            return Response({'Code':'A new verification code is sent'},status=status.HTTP_200_OK)
         elif code == VerifyCodeStatus.VALID:
             return Response({'code':'currently valid'})
         return Response({'code':'Can\'t recreate. user is verified and activated'})
