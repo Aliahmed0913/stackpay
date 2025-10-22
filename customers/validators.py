@@ -3,9 +3,8 @@ from phonenumbers.phonenumberutil import NumberParseException
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from datetime import date
+from stackpay.settings import ALLOW_AGE,CUSTOMER_NAME_LENGTH 
 
-ALLOW_AGE = 18
-CUSTOMER_NAME_LENGTH = 3
 def validate_customer_name(value:str):
     if not value[0].isupper():
         raise ValidationError(_('Name must start with an uppercase letter.'))
