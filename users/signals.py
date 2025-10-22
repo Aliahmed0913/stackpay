@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 
 from users.models import User
-from users.services.verifying_code import VerificationCodeService
+from users.services.verifying_code import VerificationCodeSerivce 
 
 @receiver(post_save, sender=User)
 def handle_user_registeration_verify_code(sender, instance, created, **kwargs):
@@ -13,7 +13,7 @@ def handle_user_registeration_verify_code(sender, instance, created, **kwargs):
     it's create an verify code'''
     if created :
         def on_commit():
-            service = VerificationCodeService(instance.id)
+            service = VerificationCodeSerivce(instance.email)
             service.create_code()
     
         transaction.on_commit(on_commit)
