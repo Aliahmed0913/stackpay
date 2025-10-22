@@ -34,15 +34,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             elif user.role_management != 'ADMIN':
                 raise serializers.ValidationError('Only admin can assign admin or staff!')
         return value
-    
     def create(self, validated_data):  
-        role = validated_data.get('role_management')
-        is_staff = role in ['ADMIN','STAFF']
+        role = validated_data.get('role_management',User.Roles.CUSTOMER)
+        is_staff = role in [User.Roles.ADMIN,User.Roles.STAFF] 
         
         c_user = User.objects.create_user(**validated_data,
-                                          is_active=False, # will activated after success verification
-                                          is_staff = is_staff
-                                          )
+                                        is_active=False, # will activated after success verification
+                                        is_staff = is_staff,
+                                        )
         return c_user
 
 class EmailCodeVerificationSerializer(serializers.Serializer):
