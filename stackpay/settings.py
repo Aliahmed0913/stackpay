@@ -26,7 +26,9 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1',
+                'prebromidic-ricardo-plangent.ngrok-free.dev',
+                ]
 
 
 # Application definition
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'users',
     'customers',
     'notifications',
+    'transactions',
     
 ]
 
@@ -132,6 +135,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR/ 'media'
+
+PAYMOB_API_KEY=env('PAYMOB_API_KEY')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, # Important: Set to False to keep Django's default loggers
+
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        '': {  # root logger for everything else
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    },
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':[
         'rest_framework_simplejwt.authentication.JWTAuthentication',      
@@ -141,16 +180,23 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES':[  
         'rest_framework.throttling.ScopedRateThrottle',
     ],
+    
     'DEFAULT_THROTTLE_RATES':{
-        'sign_up':'100/minute',
+        'sign_up':'20/minute',
         'verify_code':'10/m',
         'login': '10/minute',
         'profile':'30/minute',
         'new_password':'10/day',
         'resend_code':'3/minute',
-        'default':'10/houre'
+        'default':'100/houre'
     }
 }
+
+THROTTLES_SCOPE = {
+        'verifying_user_code':'verify_code',
+        'resend_user_code':'resend_code',
+        'change_password':'new_password',
+    }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
@@ -169,6 +215,13 @@ DEFAULT_FROM_EMAIL=env('DEFAULT_FROM_EMAIL')
 #verification code length
 CODE_LENGTH = 6
 
+# customer restrictation
+ALLOW_AGE = 18
+CUSTOMER_NAME_LENGTH = 3
+DOCUMENT_SIZE = 250 *1024
+ADDRESSES_COUNT = 3
+STATE_LENGTH = 3
+
 # CELERY_CONFIGURATION
 from .celery_beat import CELERY_BEAT_SCHEDULE
 CELERY_BROKER_URL = "redis://localhost:6379/0"
@@ -177,4 +230,7 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 
+# To run celery task with out redis broker synchronoucly
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 # celery -A stackpay worker --pool=solo -l info
