@@ -2,11 +2,7 @@ import pytest
 from users.models import User
 from rest_framework.test import APIClient
 
-@pytest.fixture(scope='session')
-def api_client():
-    return APIClient()
-
-@pytest.fixture
+@pytest.fixture(scope='function')
 def create_activate_user(db):
     def make_user(**kwargs):
         user = User.objects.create_user(
@@ -21,6 +17,9 @@ def create_activate_user(db):
         return user
     return make_user
 
-@pytest.fixture
-def mock_mail(mocker):
-    return mocker.patch('notifications.services.verification_code.mail_code_task.delay')
+@pytest.fixture()
+def authenticate_client(api_client,create_activate_user):
+    user = create_activate_user()
+    api_client.force_authenticate(user=user)
+    return user
+
