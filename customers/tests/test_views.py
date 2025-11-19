@@ -84,7 +84,7 @@ class TestKnowYourCustomerAPIView:
   def test_customer_docs(self,authenticate_client,api_client,file_name,file_size,content_type,status):
     with tempfile.TemporaryDirectory() as tmpdir:
       with override_settings(MEDIA_ROOT = tmpdir):
-        url = reverse('customers:kyc')
+        url = reverse('customers:kyc-docs')
         file = SimpleUploadedFile(file_name,b'f'* file_size,content_type)   
         payload = {'document_type':KnowYourCustomer.DocumentType.NATIONAL_ID,
                    'document_id':'C01234T2',
