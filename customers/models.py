@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django_countries.fields import CountryField
-from customers.validators import validate_phone, valid_age, validate_customer_name 
 from rest_framework.exceptions import ValidationError
+from customers.validators import validate_phone, valid_age, validate_customer_name 
+
 # Create your models here.
 User = get_user_model()
 
@@ -33,7 +34,7 @@ class Address(models.Model):
     state = models.CharField(max_length=50,blank=True,null=True)
     postal_code = models.CharField(max_length=20,blank=True,null=True)
         
-    building_nubmer = models.CharField(max_length=10,blank=True,null=True)
+    building_number = models.CharField(max_length=10,blank=True,null=True)
     appartment_number = models.CharField(max_length=10,blank=True,null=True)
     main_address = models.BooleanField(default=False)
     
@@ -42,13 +43,13 @@ class Address(models.Model):
     
     def clean(self):
         super().clean()
-        if self.country == 'EG' and not (len(self.postal_code) == 5 and (self.postal_code.isdigit())):
-            raise ValidationError({'Postal Code':'In Egypt must be five digits only.'})
+        if len(self.postal_code) != 5 and not self.postal_code.isdigit():
+            raise ValidationError({'postal code':'In Egypt must be five digits only.'})
     
-    def save(self, *arg, **kwargs):
+    def save(self,*args,**kwargs):
         if self.postal_code:
-            self.full_clean()
-        super().save(*arg, **kwargs)
+            self.full_clean() 
+        return super().save(*args,**kwargs)
     
     def __str__(self):
         return f'{self.customer.first_name or self.customer.user.username} - {self.state}'
