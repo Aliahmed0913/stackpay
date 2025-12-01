@@ -90,6 +90,7 @@ A Django REST Framework project that demonstrates a simple payment integration w
    cd stackpay
 
 2. Install dependencies: 
+    ```bash
     pip install -r requirements.txt
 
 3. - Set environment variables in .env:
