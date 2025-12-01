@@ -94,10 +94,15 @@ A Django REST Framework project that demonstrates a simple payment integration w
     pip install -r requirements.txt
 
 3. - Set environment variables in .env:
+    ```bash
     PAYMOB_API_KEY=your_api_key
     PAYMOB_PAYMENT_KEY=your_payment_key
     SECRET_KEY=your_django_secret
 
 4. run migrations:
+    ```bash
+    py manage.py makemigrations
+    py manage.py migrate
 5. - Start Celery worker:
+    ```bash
     celery -A stackpay worker -l info expired,celery
