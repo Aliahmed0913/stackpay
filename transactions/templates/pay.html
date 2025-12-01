@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        iframe {
+            margin-top: 20px;
+            border: none;
+            width: 100%;
+            height: 500px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .status.pending {
+            color: orange;
+        }
+
+        .status.success {
+            color: green;
+        }
+
+        .status.failed {
+            color: red;
+        }
+    </style>
+</head>
+</head>
+
+<body>
+    <div class="card">
+        <h2>StackPay Test Payment</h2>
+
+        <input type="text" id="jwtToken" placeholder="Paste your JWT token from Postman" />
+        <input type="number" id="amount" placeholder="Enter amount (EGP)" />
+        <button id="payBtn">Create Payment</button>
+
+        <div id="iframeContainer"></div>
+        <div id="statusContainer"></div>
+    </div>
+
+    <script>
+        const API_URL = "{% url 'transactions:transaction-create' %}"; // DRF endpoint
+        const PAYMOB_IFRAME_ID = '962850';
+
+        async function createPayment() {
+            const token = document.getElementById("jwtToken").value.trim();
+            const statusContainer = document.getElementById("statusContainer");
+
+            let amount = document.getElementById("amount").value.trim();
+
+            if (!token || !amount) {
+                alert("Please enter both token and amount.");
+                return;
+            }
+
+            const amount_restricted = parseFloat(amount)
+            amount = parseFloat(amount_restricted.toFixed(2))
+            if (amount <= 0) {
+                alert('Amount can\'t be negative or zero');
+                return;
+            }
+
+            statusContainer.textContent = "";
+            statusContainer.className = "status pending";
+            statusContainer.textContent = "Creating transaction...";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ amount: amount }),
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(JSON.stringify(err));
+                }
+
+                const data = await response.json();
+                console.log("Transaction response:", data);
+
+                // --- Handle status from backend ---
+                if (data.status) {
+                    let cssClass = "pending";
+                    if (data.status.toLowerCase() === "success") cssClass = "success";
+                    else if (data.status.toLowerCase() === "failed") cssClass = "failed";
+
+                    statusContainer.className = `status ${cssClass}`;
+                    statusContainer.textContent = `Transaction Status: ${data.status}`;
+                }
+
+                // --- Display iframe if returned ---
+                if (data.paymob_payment_token) {
+                    let iframe_url = `https://accept.paymob.com/api/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${data.paymob_payment_token}`;
+                    const iframeContainer = document.getElementById("iframeContainer");
+                    iframeContainer.innerHTML = `<iframe src="${iframe_url}" title="Payment"></iframe>`;
+
+                } else {
+                    alert("No PayMob payment token returned from server!");
+                }
+
+            } catch (err) {
+                console.error("Error:", err);
+                statusContainer.className = "status failed";
+                statusContainer.textContent = "Payment failed: " + err.message;
+            }
+        }
+        document.getElementById("payBtn").addEventListener("click", createPayment);
+
+    </script>
+</body>
+
+</html>
