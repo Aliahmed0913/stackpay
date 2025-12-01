@@ -40,7 +40,7 @@ A Django REST Framework project that demonstrates a simple payment integration w
 - **Celery** + **Redis** (for async tasks)
 - **PayMob API** integration
 - **pytest** for testing
-- **PostgreSQL/MySQL/SQLite** (choose your DB)
+- **MySQL**
 
 ---
 
