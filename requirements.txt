@@ -13,6 +13,7 @@ countryinfo==0.1.2
 Django==5.2.6
 django-countries==7.6.1
 django-environ==0.12.0
+django-filter==25.2
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 idna==3.10
