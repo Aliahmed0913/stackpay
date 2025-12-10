@@ -89,20 +89,31 @@ A Django REST Framework project that demonstrates a simple payment integration w
    git clone https://github.com/Aliahmed0913/stackpay.git
    cd stackpay
 
-2. Install dependencies: 
+2. Set your environment variables in .env:
     ```bash
-    pip install -r requirements.txt
+    SECRET_KEY=your_SECRET_KEY
+    DATABASE_URL=your_DATABASE_URL
+    MYSQL_DATABASE=your_MYSQL_DATABASE
+    MYSQL_USER=your_MYSQL_USER
+    MYSQL_PASSWORD=your_MYSQL_PASSWORD
+    MYSQL_ROOT_PASSWORD=your_MYSQL_ROOT_PASSWORD
+    EMAIL_HOST_USER=your_EMAIL_HOST_USER
+    EMAIL_HOST_PASSWORD=your_EMAIL_HOST_PASSWORD
+    DEFAULT_FROM_EMAIL=your_DEFAULT_FROM_EMAIL
+    PAYMOB_API_KEY=your_PAYMOB_API_KEY
+    AUTH_PAYMOB_TOKEN=your_AUTH_PAYMOB_TOKEN
+    PAYMOB_AUTH_CACH_KEY=your_PAYMOB_AUTH_CACH_KEY
+    ORDER_PAYMOB_URL=your_ORDER_PAYMOB_URL
+    PAYMOB_PAYMENT_URL_KEY=your_PAYMOB_PAYMENT_URL_KEY
+    PAYMOB_PAYMENT_KEY=your_PAYMOB_PAYMENT_KEY
+    CELERY_BROKER_URL=your_CELERY_BROKER_URL
+    CELERY_TIMEZONE=your_CELERY_TIMEZONE
+    NGROK_AUTHTOKEN=your_NGROK_AUTHTOKEN
 
-3. Set environment variables in .env:
+3. Build and run dockerfile with docker compose: 
     ```bash
-    PAYMOB_API_KEY=your_api_key
-    PAYMOB_PAYMENT_KEY=your_payment_key
-    SECRET_KEY=your_django_secret
+    docker compose up --build -d
 
-4. Run migrations:
+4. Access application from ngrok dashboard:
     ```bash
-    py manage.py makemigrations
-    py manage.py migrate
-5. Start Celery worker:
-    ```bash
-    celery -A stackpay worker -l info expired,celery
+    http://localhost:4040
