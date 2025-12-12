@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.views.generic import TemplateView
 
 from users.models import User
 from users.serializers import UserRegistrationSerializer,UserProfileSerializer,EmailCodeVerificationSerializer,ChangePasswordSerializer
@@ -14,6 +15,9 @@ from users.permissions import IsAdminOrOwner,IsAdmin, IsAdminOrStaff
 from stackpay.settings import THROTTLES_SCOPE
 
 # Create your views here.
+class LoginView(TemplateView):
+    template_name='user/templates/login.html'
+    
 class UserRegistrationView(APIView):
     throttle_scope = 'sign_up'
     def post(self, request):
