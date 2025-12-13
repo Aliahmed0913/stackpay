@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.exceptions import TokenError
+
 from rest_framework.request import Request
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
@@ -15,13 +15,14 @@ from django.views.generic import TemplateView
 from users.models import User
 from users.serializers import UserRegistrationSerializer,UserProfileSerializer,EmailCodeVerificationSerializer,ChangePasswordSerializer
 from users.services.verifying_code import VerificationCodeSerivce
+from users.services.user_utils import get_token_from_cookie 
 from users.permissions import IsAdminOrOwner,IsAdmin, IsAdminOrStaff
 from stackpay.settings import THROTTLES_SCOPE
 
 # Create your views here.
 class LoginView(TemplateView):
     template_name='users/templates/login.html'
-
+    
 @method_decorator(csrf_protect,name='post')
 class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -36,15 +37,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                                 )
             return Response({'access':response.data['access']},status=status.HTTP_200_OK)
         return Response({'detail':'invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
-def get_token_from_cookie(request):
-    ref_token = request.COOKIES.get('refresh_token')
-    if not ref_token:
-        return None,'No refresh token in cookie'
-    try:
-        refresh = RefreshToken(ref_token)
-        return refresh, None
-    except TokenError:
-        return None, 'invalid or expired refresh token'
     
 @method_decorator(csrf_protect,name='post')
 class CookieTokenRefreshView(APIView):
