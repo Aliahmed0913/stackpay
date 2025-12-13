@@ -1,5 +1,5 @@
 from django.urls import path,include
-from .views import LoginView,UserProfileViewSet,VerificationCodeViewSet,UserRegistrationView,CustomTokenObtainPairView
+from .views import LoginView,CookieTokenObtainPairView,CookieTokenRefreshView,CookieTokenDisableTokenView,UserProfileViewSet,VerificationCodeViewSet,UserRegistrationView,CustomTokenObtainPairView
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 
@@ -14,6 +14,9 @@ urlpatterns = [
     path('sign-up/',UserRegistrationView.as_view(),name='registration'),
     path('login/',CustomTokenObtainPairView.as_view(),name='get-token'),
     path('login-view/',LoginView.as_view(),name='login-view'),
-    path('refresh/',TokenRefreshView.as_view(),name='refresh-token'),
+    path('obtain-token/',CookieTokenObtainPairView.as_view(),name='obtain-token'),
+    path('refresh-token/',CookieTokenRefreshView.as_view(),name='refresh-token'),
+    path('refresh_block/',CookieTokenDisableTokenView.as_view(),name='refresh-disabled'),
+    path('refresh/',TokenRefreshView.as_view(),name='refresh'),
     path('logout/',TokenBlacklistView.as_view(),name='block-token'),
 ]
