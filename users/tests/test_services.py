@@ -1,7 +1,7 @@
 import pytest
 from users.models import EmailCode
 from django.utils import timezone
-from users.services.expired_code import remove_expired_code
+from users.services.user_utils import remove_expired_code
 from users.services.verifying_code import VerificationCodeSerivce as vcs,CodeNotFoundError,CodeExpiredError,InvalidCodeError
 
 @pytest.mark.django_db
