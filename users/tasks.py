@@ -1,5 +1,5 @@
 from celery import shared_task,Task
-from users.services.expired_code import remove_expired_code
+from users.services.user_utils import remove_expired_code
 import logging
 log = logging.getLogger(__name__)
 
