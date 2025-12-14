@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from transactions.models import Transaction
-from .services.transaction_orchestration import create_transaction
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta():
