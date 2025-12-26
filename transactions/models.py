@@ -1,8 +1,8 @@
+import uuid
 from django.db import models
-from customers.models import Customer
 from django.core.validators import MinValueValidator
 from decimal import Decimal
-import uuid
+from customers.models import Customer
 # Create your models here.
 
 class Transaction(models.Model):
