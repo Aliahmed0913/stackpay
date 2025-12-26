@@ -1,14 +1,13 @@
-from django.core.cache import cache
 import requests, logging
+from django.core.cache import cache
+from django.conf import settings
 from transactions.services.http_client import get_session_with_retries
-import uuid
 from customers.models import Address
-from stackpay.settings import SUPPORTED_COUNTRIES,CONNECTION_TIMEOUT,PAYMOB_AUTH_CACH_KEY,PAYMOB_API_KEY,AUTH_PAYMOB_TOKEN,ORDER_PAYMOB_URL,PAYMOB_PAYMENT_KEY,PAYMOB_PAYMENT_URL_KEY
 
 logger = logging.getLogger(__name__)
 
-class PayMobServiceError(Exception):
-    # Raised when PayMob API fail or return invalid value
+class ProviderServiceError(Exception):
+    # Raised when provider API fail or return invalid value
     def __init__(self, message, details=None):
         super().__init__(message)
         self.message = message
@@ -24,15 +23,6 @@ class PayMob():
         
         if not (currency and address):
             self.currency,self.address = self.country_native_currencies()
-             
-    @staticmethod
-    def generate_id():
-        '''
-        Return an unique ID using uuid 4
-        '''
-        merchant_id = f"ORD-{uuid.uuid4().hex[:6].upper()}"
-        logger.info('Merchant ID has successfully created.')
-        return merchant_id
     
     def country_native_currencies(self):
         '''
@@ -41,12 +31,12 @@ class PayMob():
         address = Address.objects.filter(customer_id=self.customer.id,main_address=True).first()
         if not address:
             logger.error(f'There is no main address specified for {self.user.username}.')
-            raise PayMobServiceError(message='There is no main address specified',details='Address')
+            raise ProviderServiceError(message='There is no main address specified',details='Address')
         
-        currency = SUPPORTED_COUNTRIES.get(address.country.name)
+        currency = getattr(settings,'SUPPORTED_COUNTRIES',{}).get(address.country.code)
         if not currency:
             logger.error(f'Currency for that country is unsupported.')
-            raise PayMobServiceError('Country unsupported',details='Currency')
+            raise ProviderServiceError('Country unsupported',details='Currency')
         
         logger.info('Customer\'s local currency has been successfully determined')
         
@@ -59,44 +49,45 @@ class PayMob():
         Return the requested field from the endpoint provided 
         '''
         try:
-            response = self.session.post(url=endpoint, json=payload, timeout=CONNECTION_TIMEOUT)
+            response = self.session.post(url=endpoint, json=payload, timeout=getattr(settings,'CONNECTION_TIMEOUT',(5,5)))
             response.raise_for_status()
             
             data = response.json()
             result = data.get(requested_field)
             
             if not result:
-                logger.error(f'There is no {field_name} returned when requesting it from PayMob.')
-                raise PayMobServiceError(f'The API did not return the {field_name}.',f'{field_name.capitalize()}')
+                logger.error(f'There is no {field_name} returned when requesting it from provider.')
+                raise ProviderServiceError(f'The API did not return the {field_name}.',f'{field_name.capitalize()}')
             
-            logger.info(f'PayMob {field_name} has successfully returned.')
+            logger.info(f'provider {field_name} has successfully returned.')
             return result
         
         except requests.RequestException as pe:
-            logger.error(f'Request for PayMob {field_name} fail.')
-            raise PayMobServiceError('PayMob API fail',details=str(pe))
+            logger.error(str(pe))
+            raise ProviderServiceError('provider API fail',details=str(pe))
     
 
     def get_auth_token(self):
         '''
-        Return the authentication token to access the PayMob account using the API key  
+        Return the authentication token to access the provider account using the API key  
         '''
-        token = cache.get(PAYMOB_AUTH_CACH_KEY)
+        cache_key = getattr(settings,'PAYMOB_AUTH_CACH_KEY')
+        token = cache.get(cache_key)
         if token:
-            logger.info('PayMob authentication token returned.')
+            logger.info('provider authentication token returned.')
             return token
         
-        payload = {'api_key':PAYMOB_API_KEY}
-        token = self._request_field(payload=payload,endpoint=AUTH_PAYMOB_TOKEN,
+        payload = {'api_key':getattr(settings,'PAYMOB_API_KEY')}
+        token = self._request_field(payload=payload,endpoint=getattr(settings,'AUTH_PAYMOB_TOKEN'),
                                    requested_field='token',field_name='authentication token')
-        
-        cache.set(PAYMOB_AUTH_CACH_KEY,token,timeout=60*50)
-        
+
+        cache.set(cache_key,token,timeout=getattr(settings,'CACHE_LIFETIME'))
+
         return token
     
     def _build_order_payload(self,merchant_id,amount_cents):
         '''
-        Set payload for creating an order in PayMob
+        Set payload for creating an order in provider
         '''
         token = self.get_auth_token()
         payload = {
@@ -109,7 +100,7 @@ class PayMob():
         }
         return payload
     
-    def _build_payment_payload(self,amount_cents,paymob_id):
+    def _build_payment_payload(self,amount_cents,provider_id):
         '''
         Set payload for requesting the payment key token 
         '''
@@ -118,11 +109,11 @@ class PayMob():
             'auth_token': token,
             "amount_cents": amount_cents,
             "currency": self.currency,
-            "order_id": paymob_id,
+            "order_id": provider_id,
             "billing_data":{
                 "apartment": self.address.apartment_number or 'NA',
-                "email": self.user.email or '',
-                "first_name": self.customer.first_name or '',
+                "email": self.user.email or 'Na',
+                "first_name": self.customer.first_name or 'NA',
                 "last_name": self.customer.last_name or 'un-known',
                 "street": self.address.line or 'NA',
                 "building": self.address.building_number or 'NA',
@@ -134,29 +125,30 @@ class PayMob():
                 "floor": "NA",
                 "shipping_method": "PKG",
             },
-            "integration_id": PAYMOB_PAYMENT_KEY,
+            "integration_id": getattr(settings,'PAYMOB_PAYMENT_KEY'),
         }
         
         return payload
     
     def create_order(self,merchant_id,amount_cents):
         '''
-        Create an order in PayMob and return PayMob order ID.
+        Return order ID from provider.
         
         Raises:
-            PayMobServiceError if the API fails or returns no order ID. 
+            ProviderServiceError if the API fails or returns no order ID. 
         '''
            
         payload = self._build_order_payload(merchant_id,amount_cents)
-        paymob_id = self._request_field(payload=payload,endpoint=ORDER_PAYMOB_URL,requested_field='id',field_name='order ID')
-        return paymob_id    
+        provider_id = self._request_field(payload=payload,endpoint=getattr(settings,'ORDER_PAYMOB_URL'),requested_field='id',field_name='order ID')
+        return provider_id    
    
-    def payment_key_token(self, paymob_id, amount_cents):
+    def payment_key_token(self, provider_id, amount_cents):
         '''
         Return the payment token specialized to who pay. Used to return an iframe 
         '''
      
-        payload = self._build_payment_payload(amount_cents,paymob_id)
-        payment_token = self._request_field(payload=payload,endpoint=PAYMOB_PAYMENT_URL_KEY,
+        payload = self._build_payment_payload(amount_cents,provider_id)
+        payment_token = self._request_field(payload=payload,endpoint=getattr(settings,'PAYMOB_PAYMENT_URL_KEY'),
                                            requested_field='token',field_name='payment token')
+        
         return payment_token
