@@ -29,11 +29,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-CSRF_TRUSTED_ORIGINS = [
-    "https://prebromidic-ricardo-plangent.ngrok-free.dev",
-]
-# ALLOWED_HOSTS=['localhost','127.0.0.1','prebromidic-ricardo-plangent.ngrok-free.dev',]
-
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
 
 # Application definition
 
@@ -191,7 +187,7 @@ REST_FRAMEWORK = {
         'profile':'30/minute',
         'new_password':'10/day',
         'resend_code':'3/minute',
-        'default':'100/houre'
+        'default':'100/hour'
     },
     
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
@@ -205,7 +201,7 @@ THROTTLES_SCOPE = {
 
 #session settings
 LIFETIME_SESSION = 60*60*24
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Strict'
 
@@ -225,7 +221,6 @@ DEFAULT_FROM_EMAIL=env('DEFAULT_FROM_EMAIL')
 
 #verification code length
 CODE_LENGTH = 6
-
 # customer restrictation
 ALLOW_AGE = 18
 CUSTOMER_NAME_LENGTH = 3
@@ -233,14 +228,15 @@ DOCUMENT_SIZE = 250 *1024
 ADDRESSES_COUNT = 3
 STATE_LENGTH = 3
 
-#PayMob config
+# Provider config
+# PayMob Configuration
 PAYMOB_API_KEY=env('PAYMOB_API_KEY')
 AUTH_PAYMOB_TOKEN = env('AUTH_PAYMOB_TOKEN')
 PAYMOB_AUTH_CACH_KEY = env('PAYMOB_AUTH_CACH_KEY')
 ORDER_PAYMOB_URL = env('ORDER_PAYMOB_URL')
 PAYMOB_PAYMENT_URL_KEY = env('PAYMOB_PAYMENT_URL_KEY')
 PAYMOB_PAYMENT_KEY = env('PAYMOB_PAYMENT_KEY')
-
+CACHE_LIFETIME = 60*50
 CONNECTION_TIMEOUT = (5,15)
 SUPPORTED_COUNTRIES = {
     "Egypt": "EGP",
