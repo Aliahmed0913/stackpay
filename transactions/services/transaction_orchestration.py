@@ -11,19 +11,18 @@ def create_transaction(customer,validated_data):
     '''
     provider = PayMob(customer)
     amount_cents = int(validated_data.get('amount')*100)
-    merchant_id = validated_data['merchant_order_id']
-    
     logger.info(f"Creating transaction for customer {customer.id}, amount {validated_data['amount']}")
     with db_transaction.atomic():
         transaction = Transaction.objects.create(
             customer=customer,
-            merchant_order_id=merchant_id,
             **validated_data,
             )
+    merchant_id = str(transaction.merchant_order_id)
     logger.info(f"Transaction {merchant_id} created successfully.")
     
     # Interact with provider to create order and payment token
     interact_with_provider(merchant_id,amount_cents,provider,transaction)
+    transaction.refresh_from_db()
     return transaction
 
 def interact_with_provider(merchant_id,amount_cents,provider,transaction):
@@ -41,7 +40,7 @@ def interact_with_provider(merchant_id,amount_cents,provider,transaction):
             tx.state = Transaction.TransactionState.FAILED
             tx.save(update_fields=['state'])
         logger.warning(f"Transaction {merchant_id} failed during provider interaction: {e.message}")
-        raise
+        
     
 def set_provider_fields(transaction,merchant_id,provider_id,payment_token):
     '''
