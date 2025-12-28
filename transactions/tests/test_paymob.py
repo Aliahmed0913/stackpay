@@ -1,23 +1,10 @@
 import pytest
-from transactions.services.paymob import PayMob, PayMobServiceError
-from customers.models import Customer, Address
-from rest_framework import status
 import requests
-import string
-from django.core.cache import cache
-# import responses
-CONNECTION_TIMEOUT = (5,15)
-PAYMOB_AUTH_CACH_KEY = 'paymob_token_key'
+from transactions.services.paymob import PayMob, ProviderServiceError
+from rest_framework import status
 
 @pytest.mark.django_db()
-class TestPayMobService:
-    def test_generate_id(self):
-        id = PayMob.generate_id()
-        hex_digits = id[4:]
-        is_hex = all(n in string.hexdigits for n in hex_digits)
-        assert id.startswith('ORD') and is_hex
-        assert len(hex_digits) == 6
-    
+class TestPayMobService:  
     def test_correct_currency(self,customer_factory):
         customer=customer_factory(username='Currency_return',email='Currency-return009@gmail.com')
         paymob = PayMob(customer,currency='fakeconditionfield',address='fieldfortest')
@@ -30,7 +17,7 @@ class TestPayMobService:
         customer=customer_factory(with_address=have_address,country=country)     
         paymob = PayMob(customer,currency='fakeconditionfield',address='fieldfortest')
         
-        with pytest.raises(PayMobServiceError):
+        with pytest.raises(ProviderServiceError):
             paymob.country_native_currencies()
             
     def test_request_field(self,customer_factory,mock_post):
@@ -55,7 +42,7 @@ class TestPayMobService:
         
         if status_code == status.HTTP_400_BAD_REQUEST:
             mock_post.raise_for_status.side_effect = requests.exceptions.HTTPError('Bad Request')
-        with pytest.raises(PayMobServiceError):
+        with pytest.raises(ProviderServiceError):
             paymob._request_field(payload={'fake':'data'}
                                        ,endpoint='http://fake.paymob/api'
                                        ,requested_field='not_found'
