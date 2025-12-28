@@ -21,10 +21,11 @@ def customer_factory(db):
 
 @pytest.fixture
 def mock_post(mocker):
-    mock_post = mocker.patch('transactions.services.paymob.requests.post')
-    mock_response = mocker.Mock()
-    mock_post.return_value = mock_response
-    return mock_response
+  session = mocker.Mock()
+  mock_response = mocker.Mock()
+  session.post.return_value = mock_response
+  mocker.patch('transactions.services.paymob.get_session_with_retries',return_value=session)
+  return mock_response
 
 
 
