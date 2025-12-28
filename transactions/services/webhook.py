@@ -74,7 +74,6 @@ class WebhookService:
 
         if not (hmac.compare_digest(calculate_hmac,received_hmac)):
             logger.warning('This callback doesn\'t belong to this process.')
-            return False
+            raise WebhookServiceError('HMAC verification failed.','HMAC_MISMATCH')
         logger.info('HMAC verified success.')
-        return True
     
