@@ -12,11 +12,6 @@ def api_client():
     return APIClient()
 
 
-@pytest.fixture
-def mock_mail(mocker):
-    return mocker.patch("notifications.services.verification_code.mail_code_task.delay")
-
-
 @pytest.fixture(scope="function")
 def create_activate_user(db, mocker):
     post_save.disconnect(initiate_verification_code, sender=User)

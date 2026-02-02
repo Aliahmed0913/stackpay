@@ -5,6 +5,13 @@ from django.conf import settings
 from ..models import User, VerificationCode
 
 
+@pytest.fixture
+def mock_mail(mocker):
+    return mocker.patch(
+        "users.services.verifying_code.verification_code_mail_task.delay"
+    )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def fast_password_hasher():
     settings.PASSWORD_HASHERS = [

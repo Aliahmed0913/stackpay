@@ -49,7 +49,7 @@ class VerificationCodeService:
         expiry time to consume that code
         """
         # check if there is no active code for that user
-        if not self.active_code():
+        if not self.last_unused_code():
             with transaction.atomic():
                 verification_code = VerificationCode.objects.create(
                     user=self.user,
@@ -59,14 +59,14 @@ class VerificationCodeService:
 
             logger.info("Code created.", extra={"user_email": self.user.email})
             transaction.on_commit(
-                lambda: verification_code_mail_task(verification_code.id)
+                lambda: verification_code_mail_task.delay(verification_code.id)
             )
 
     def validate_code(self, received_code: str):
         """
         Check if there an active code for requested user and evaluate it with received_code.
         """
-        verify_code = self.active_code()
+        verify_code = self.last_unused_code()
 
         if not verify_code:
             logger.warning("No active code.", extra={"user_email": self.user.email})
@@ -88,20 +88,21 @@ class VerificationCodeService:
 
     def recreate_code_on_demand(self):
         """Check if there is no active verify code for not activated user and generate new one."""
-        current_code = self.active_code()
+        last_code = self.last_unused_code()
 
         # check if the user has been verified before
         if self.user.is_active:
-            logger.warning("user has verified.")
+            logger.warning("user has verified or has active code.")
             return self.VerifyCodeStatus.ACTIVE
 
         # see if the code for that user is expired disable it and create new one
-        elif self.is_expired_code(current_code):
-            self.disable_code(current_code)
+        elif self.is_expired_code(last_code):
+            if last_code:
+                self.disable_code(last_code)
             self.create_code()
             return self.VerifyCodeStatus.CREATED
 
-        remaining = current_code.expiry_time - timezone.now()
+        remaining = last_code.expiry_time - timezone.now()
         logger.info(
             "There is active code",
             extra={"remaining_time": f"{remaining.seconds // 60 }m"},
@@ -110,7 +111,7 @@ class VerificationCodeService:
 
     def is_expired_code(self, code):
         # check if code expired time exceeded the current time
-        if code.expiry_time < timezone.now():
+        if code.expiry_time <= timezone.now():
             logger.warning(
                 "Verify code expired.", extra={"user_email": self.user.email}
             )
@@ -121,13 +122,15 @@ class VerificationCodeService:
         code.is_used = True
         code.save(update_fields=["is_used"])
 
-    def active_code(self):
+    def last_unused_code(self):
         """Return lastly active code for specific user."""
-        return (
-            VerificationCode.objects.filter(user_id=self.user.id, is_used=False)
-            .order_by("-created_at")
-            .first()
-        )
+
+        last_code = VerificationCode.objects.filter(
+            user_id=self.user.id, is_used=False
+        ).order_by("-created_at")
+        if last_code.exists():
+            return last_code.first()
+        return None
 
     def generate_code(self):
         """

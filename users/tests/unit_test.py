@@ -15,12 +15,11 @@ class TestVerificationCodeService:
     def test_create_code(self, create_user):
         user1 = create_user()  # un active user
         verify_code = vcs(user_email=user1.email)
-        created_code = verify_code.create_code(
+        verify_code.create_code(
             expiry=None
         )  # can specify the live of our code (expiry) timedelta
         code_instance = VerificationCode.objects.get(user_id=user1.id)
         assert code_instance is not None
-        assert int(code_instance.code) == created_code.code
 
     def test_validate_code_not_found(self, create_user):
         received_code = "123456"

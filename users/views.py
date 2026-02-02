@@ -174,15 +174,15 @@ class VerificationCodeViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
 
-        service = VerificationCodeService(email)
-        code = service.recreate_code_on_demand()
+        verify_code = VerificationCodeService(email)
+        result = verify_code.recreate_code_on_demand()
 
-        if code == service.VerifyCodeStatus.CREATED:
+        if result == verify_code.VerifyCodeStatus.CREATED:
             return Response(
-                {"detail": "Verification code sent to email"},
+                {"detail": "New verification code sent."},
                 status=status.HTTP_200_OK,
             )
         return Response(
-            {"detail": "Verification code already sent or user verified."},
+            {"detail": "Failed to send verification code."},
             status=status.HTTP_400_BAD_REQUEST,
         )
