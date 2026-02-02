@@ -14,15 +14,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from stackpay import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/users/',include('users.urls',namespace='users')),
-    path('api/v1/customers/',include('customers.urls',namespace='customers')),
-    path('api/v1/transactions/',include('transactions.urls',namespace='transactions')),
-    
-]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) 
+    path("admin/", admin.site.urls),
+    path("api/v1/users/", include("users.urls", namespace="users")),
+    path("api/v1/customers/", include("customers.urls", namespace="customers")),
+    path(
+        "api/v1/transactions/", include("transactions.urls", namespace="transactions")
+    ),
+    path(
+        "api/v1/notifications/",
+        include("notifications.urls", namespace="notifications"),
+    ),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
