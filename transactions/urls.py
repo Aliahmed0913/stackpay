@@ -9,5 +9,5 @@ register.register(r"transaction", TransactionViewSet, basename="transaction")
 urlpatterns = [
     path("", include(register.urls)),
     path("webhook/", PayMobWebHookView.as_view(), name="transaction_webhook"),
-    path("testpay-view/", TransactionView.as_view(), name="transaction_view"),
+    path("testpay-view/", TransactionView.as_view(), name="checkout_view"),
 ]
