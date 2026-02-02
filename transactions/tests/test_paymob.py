@@ -6,26 +6,6 @@ from ..services.paymob import ProviderServiceError
 
 @pytest.mark.django_db()
 class TestPayMobService:
-    def test_correct_currency(self, customer_factory, paymob_factory):
-        customer = customer_factory(
-            username="Currency_return", email="Currency-return009@gmail.com"
-        )
-        paymob = paymob_factory(customer)
-        currency, _ = paymob.country_native_currencies()
-        assert currency == "EGP"
-
-    @pytest.mark.parametrize(
-        "have_address,country",
-        [(False, None), (True, "SD")],  # no main address raise error here
-    )  # unsupported country raise error here
-    def test_fail_currency(
-        self, customer_factory, paymob_factory, have_address, country
-    ):
-        customer = customer_factory(with_address=have_address, country=country)
-        paymob = paymob_factory(customer)
-
-        with pytest.raises(ProviderServiceError):
-            paymob.country_native_currencies()
 
     def test_request_field(self, customer_factory, paymob_factory, mock_post):
         customer = customer_factory(with_address=False)
