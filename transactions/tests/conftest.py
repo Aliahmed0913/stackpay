@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
-from customers.models import Customer, Address
 from ..services.paymob import PayMob
+from customers.models import Customer, Address
 
 User = get_user_model()
 

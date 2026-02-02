@@ -1,6 +1,6 @@
 import pytest
-from ..services.orchestration import TransactionOrchestrationService as tos
 from django.db import transaction as db_transaction
+from ..services.orchestration import TransactionOrchestrationService as tos
 
 
 @pytest.mark.django_db
