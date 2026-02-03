@@ -1,9 +1,17 @@
 import logging
 from django.conf import settings
-from ..models import Address
+from django.db import transaction
+from ..models import Customer, Address, KnowYourCustomer
 
 logger = logging.getLogger(__name__)
 
+
+@transaction.atomic
+def initialize_customer(user):
+    customer = Customer.objects.create(user = user)
+    Address.objects.create(customer=customer,main_address=True)
+    KnowYourCustomer.objects.create(customer=customer)
+    return customer
 
 class SupportedCountryError(Exception):
     """Raised when the customer's country is unsupported"""

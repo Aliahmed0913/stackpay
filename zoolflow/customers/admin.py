@@ -1,6 +1,6 @@
 from django.contrib import admin
-from customers.models import Customer, Address, KnowYourCustomer
-from customers.serializers import ADDRESSES_COUNT
+from zoolflow.customers.models import Customer, Address, KnowYourCustomer
+from zoolflow.customers.serializers import ADDRESSES_COUNT
 # Register your models here.
 class AddressInline(admin.TabularInline):
     model = Address

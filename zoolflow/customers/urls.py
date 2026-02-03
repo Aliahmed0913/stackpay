@@ -1,6 +1,6 @@
 
 from django.urls import path, include
-from customers.views import CustomerProfileAPIView,CustomerAddressViewSet, KnowYourCustomerAPIView
+from .views import CustomerProfileAPIView,CustomerAddressViewSet, KnowYourCustomerAPIView
 from rest_framework.routers import DefaultRouter
 
 app_name = 'customers'

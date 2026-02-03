@@ -2,7 +2,7 @@ import uuid
 from decimal import Decimal
 from django.db import models
 from django.core.validators import MinValueValidator
-from customers.models import Customer
+from zoolflow.customers.models import Customer
 
 # Create your models here.
 

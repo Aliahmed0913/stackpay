@@ -28,7 +28,7 @@ class LoginThrottle(ScopedRateThrottle):
 
 
 class LoginView(TemplateView):
-    template_name = "users/templates/login.html"
+    template_name = "zoolflow/users/templates/login.html"
 
 
 @method_decorator(csrf_protect, name="post")

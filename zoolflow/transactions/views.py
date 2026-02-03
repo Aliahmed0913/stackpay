@@ -114,4 +114,4 @@ class PayMobWebHookView(APIView):
 
 
 class TransactionView(TemplateView):
-    template_name = "transactions/templates/pay.html"
+    template_name = "zoolflow/transactions/templates/pay.html"

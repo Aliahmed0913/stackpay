@@ -1,7 +1,7 @@
 from django.contrib import admin
-from users.models import User
 from django.contrib.auth.admin import UserAdmin
-from users.forms import CustomUserChangeForm, CustomUserCreationForm
+from zoolflow.users.models import User
+from zoolflow.users.forms import CustomUserChangeForm, CustomUserCreationForm
 
 # Register your models here.
 

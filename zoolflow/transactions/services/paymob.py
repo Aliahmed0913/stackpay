@@ -3,7 +3,7 @@ import requests
 from django.core.cache import cache
 from django.conf import settings
 from .http_client import get_session_with_retries
-from customers.services.helpers import country_and_currency
+from zoolflow.customers.services.helpers import country_and_currency
 
 logger = logging.getLogger(__name__)
 

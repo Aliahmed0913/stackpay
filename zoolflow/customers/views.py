@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
-from customers.models import Customer, Address, KnowYourCustomer
-from customers.serializers import (
+from .models import Customer, Address, KnowYourCustomer
+from .serializers import (
     CustomerProfileSerializer,
     CustomerAddressSerializer,
     KnowYourCustomerSerializer,

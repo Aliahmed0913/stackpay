@@ -22,13 +22,13 @@ from config import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/v1/users/", include("users.urls", namespace="users")),
-    path("api/v1/customers/", include("customers.urls", namespace="customers")),
+    path("api/v1/users/", include("zoolflow.users.urls", namespace="users")),
+    path("api/v1/customers/", include("zoolflow.customers.urls", namespace="customers")),
     path(
-        "api/v1/transactions/", include("transactions.urls", namespace="transactions")
+        "api/v1/transactions/", include("zoolflow.transactions.urls", namespace="transactions")
     ),
     path(
         "api/v1/notifications/",
-        include("notifications.urls", namespace="notifications"),
+        include("zoolflow.notifications.urls", namespace="notifications"),
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

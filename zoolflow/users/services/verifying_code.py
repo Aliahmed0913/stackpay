@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.db import transaction
 from ..models import VerificationCode, User
 from config.settings import CODE_LENGTH
-from notifications.tasks import verification_code_mail_task
 
 logger = logging.getLogger(__name__)
 

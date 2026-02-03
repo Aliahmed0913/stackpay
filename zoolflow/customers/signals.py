@@ -1,14 +1,14 @@
+import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from users.models import User
-from customers.models import KnowYourCustomer as KYC
-from customers.services.start_customer import bootstrap_customer
-import logging
+from .models import KnowYourCustomer as KYC
+from .services.helpers import initialize_customer
+from zoolflow.users.models import User
 
 logger = logging.getLogger(__name__)
 
 @receiver(post_save,sender=User)
-def handle_activation_user(sender, instance, created, **kwargs):
+def handle_customer_creation(sender, instance, created, **kwargs):
     '''
     Listen to users with role customer when it's successfully verified there email account
     
@@ -16,11 +16,11 @@ def handle_activation_user(sender, instance, created, **kwargs):
     '''
     if not created and instance.is_active and instance.role_management == 'CUSTOMER':
         if not hasattr(instance,'customer_profile'):
-            bootstrap_customer(user=instance)
+            initialize_customer(user=instance)
             logger.info('Customer and all references set up.')
 
 @receiver(post_save,sender=KYC)
-def handle_approved_customer(sender, instance, created, **kwargs):
+def handle_kyc_status_change(sender, instance, created, **kwargs):
     '''
     Listen to the customer to get approved when the admin successfully emphasizes that the document is okay.   
     '''

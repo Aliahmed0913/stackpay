@@ -48,10 +48,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    "users",
-    "customers",
-    "notifications",
-    "transactions",
+    "zoolflow.users",
+    "zoolflow.customers",
+    "zoolflow.notifications",
+    "zoolflow.transactions",
 ]
 
 MIDDLEWARE = [
@@ -203,20 +203,10 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
-<<<<<<< HEAD:stackpay/settings.py
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587  # TLS and 465 for SSL
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-=======
 # MailGun Configuration
 MAILGUN_API_KEY = env("MAILGUN_API_KEY")
 EMAIL_DOMAIN = env("EMAIL_DOMAIN")
 MAILGUN_BASE_URL = env("MAILGUN_BASE_URL")
->>>>>>> 93bbb3d (implement 3-tier structure):config/settings/base.py
 
 # verification code length
 CODE_LENGTH = 6
