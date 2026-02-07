@@ -1,8 +1,10 @@
 import logging
 import requests
 import json
+import time
 from django.core.cache import cache
 from django.conf import settings
+from redis.exceptions import LockError
 from .http_client import get_session_with_retries
 from .payloads import order_payload, payment_token_payload
 
@@ -54,27 +56,44 @@ class PayMobClient:
             logger.error(f"Provider failed with error: {str(pe)}")
             raise ProviderServiceError("provider API fail", details=str(pe))
 
-    def get_auth_token(self):
+    def _get_auth_token(self, retries):
         """
         Return the authentication token to access the provider account using the API key
         """
+        if retries < 1:
+            raise ProviderServiceError(
+                "redis is down or can't reach the provider, try again"
+            )
         cache_key = getattr(settings, "PAYMOB_AUTH_CACH_KEY")
         token = cache.get(cache_key)
         if token:
             logger.info("provider authentication token returned.")
             return token
+        try:
+            # lock to prevent race condition with workers
+            with cache.lock(f"{cache_key}:lock", timeout=15, blocking_timeout=2):
+                # check if there a worker fetch the token yet
+                token = cache.get(cache_key)
+                if token:
+                    logger.info("provider authentication token returned.")
+                    return token
+                # request for the token
+                payload = {"api_key": getattr(settings, "PAYMOB_API_KEY")}
+                token = self._request_field(
+                    payload=payload,
+                    endpoint=getattr(settings, "AUTH_PAYMOB_TOKEN"),
+                    requested_field="token",
+                    field_name="authentication token",
+                )
 
-        payload = {"api_key": getattr(settings, "PAYMOB_API_KEY")}
-        token = self._request_field(
-            payload=payload,
-            endpoint=getattr(settings, "AUTH_PAYMOB_TOKEN"),
-            requested_field="token",
-            field_name="authentication token",
-        )
+                timeout = getattr(settings, "CACHE_LIFETIME")
+                cache.set(cache_key, token, timeout=timeout)
+                return token
 
-        cache.set(cache_key, token, timeout=getattr(settings, "CACHE_LIFETIME"))
-
-        return token
+        except LockError:
+            time.sleep(0.5)
+            retries = retries - 1
+            return self._get_auth_token(retries)
 
     def create_order(self, merchant_id):
         """
@@ -84,7 +103,7 @@ class PayMobClient:
             ProviderServiceError if the API fails or returns no order ID.
         """
         try:
-            token = self.get_auth_token()
+            token = self._get_auth_token(retries=3)
             payload = order_payload(
                 self.amount_cents,
                 token,
@@ -108,7 +127,7 @@ class PayMobClient:
         Return the payment token specialized to who pay. Used to return an iframe
         """
         try:
-            token = self.get_auth_token()
+            token = self._get_auth_token(retries=3)
             payload = payment_token_payload(
                 self.amount_cents,
                 token,
@@ -134,7 +153,7 @@ class PayMobClient:
 
         By calling 'By Transacion ID' endpoint that take transaction id and Auth token
         """
-        token = self.get_auth_token()  # handle this with redis
+        token = self._get_auth_token(retries=3)  # handle this with redis
         header = {
             "Authorization": f"Bearer {token}",
         }

@@ -192,24 +192,26 @@ THROTTLES_SCOPE = {
 }
 
 # session settings
-LIFETIME_SESSION = 60 * 60 * 24
+LIFETIME_SESSION = 60 * 60 * 24  # 24 hours
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Strict"
+ACCESS_TOKEN_LIFETIME = 60 * 60
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=ACCESS_TOKEN_LIFETIME),
     "REFRESH_TOKEN_LIFETIME": timedelta(seconds=LIFETIME_SESSION),
     "UPDATE_LAST_LOGIN": True,
 }
 
 # MailGun Configuration
-MAILGUN_BASE_URL = 'https://api.mailgun.net'
+MAILGUN_BASE_URL = "https://api.mailgun.net"
 MAILGUN_API_KEY = env("MAILGUN_API_KEY")
 EMAIL_DOMAIN = env("EMAIL_DOMAIN")
 MAILGUN_WEBHOOK_SIGINING_KEY = env("MAILGUN_WEBHOOK_SIGINING_KEY")
 
-# verification code length
+# verification code constraints
+DEFAULT_EXPIRY_TIME = timedelta(minutes=10)
 CODE_LENGTH = 6
 # customer restrictation
 ALLOW_AGE = 18
@@ -220,14 +222,14 @@ STATE_LENGTH = 3
 
 # Provider config
 # PayMob Configuration
+PAYMOB_AUTH_CACH_KEY = "paymob:token:key"
 PAYMOB_API_KEY = env("PAYMOB_API_KEY")
 AUTH_PAYMOB_TOKEN = env("AUTH_PAYMOB_TOKEN")
-PAYMOB_AUTH_CACH_KEY = env("PAYMOB_AUTH_CACH_KEY")
 ORDER_PAYMOB_URL = env("ORDER_PAYMOB_URL")
 PAYMOB_PAYMENT_URL_KEY = env("PAYMOB_PAYMENT_URL_KEY")
 PAYMOB_PAYMENT_KEY = env("PAYMOB_PAYMENT_KEY")
 HMAC_SECRET_KEY = env("HMAC_SECRET_KEY")
-CACHE_LIFETIME = 60 * 50
+CACHE_LIFETIME = 60 * 30
 CONNECTION_TIMEOUT = (5, 15)
 SUPPORTED_COUNTRIES = {
     "Egypt": "EGP",
@@ -236,9 +238,18 @@ SUPPORTED_COUNTRIES = {
     "Pakistan": "PKR",
     "United Arab Emirates": "AED",
 }
-
+# Redis cache config
+REDIS_URL_CACHE = "redis://localhost:6379/1"
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL_CACHE,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
 # CELERY_CONFIGURATION
-
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_TIMEZONE = env("CELERY_TIMEZONE")
 CELERY_TASK_SERIALIZER = "json"
